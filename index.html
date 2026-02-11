@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- PWA: color de barra y manifiesto -->
+  <meta name="theme-color" content="#240028">
+  <link rel="manifest" href="manifest.json">
+  <title>Variedades y Servicios JA</title>
+  <style>
+    /* ===== VARIABLES GLOBALES ===== */
+    :root {
+      --bg-dark: #1f2933;        /* Color oscuro para encabezados */
+      --text-light: white;       /* Texto blanco */
+      --accent-green: #16a34a;   /* Verde para botones de agregar */
+      --accent-blue: #2563eb;    /* Azul para botones principales */
+      --success-bg: #00ffcc;     /* Verde claro para balance */
+      --border-color: #ddd;      /* Color de bordes */
+      --card-bg: #ffffff;        /* Fondo de tarjetas */
+      --input-bg: #fafafa;       /* Fondo de inputs */
+      --danger-red: #dc2626;     /* Rojo para acciones peligrosas */
+    }
+
+    /* ===== RESET Y ESTILOS BASE ===== */
+    * {
+      box-sizing: border-box;    /* Modelo de caja consistente */
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* ===== CUERPO DE LA PÁGINA ===== */
+    body {
+      background: #f8fafc;       /* Fondo gris claro */
+      color: black;            /* Texto gris oscuro */
+      line-height: 1.5;
+      font-size: 0.9rem;
+    }
+
+    /* ===== ENCABEZADO ===== */
+    header {
+      background: #280024;
+      color: var(--text-light);
+      padding: 0.6rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
+    /* Título del negocio con funcionalidad de triple clic */
+    .store-title {
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.3s ease;
+      padding: 0.5rem;
+      border-radius: 4px;
+    }
+
+    .store-title:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .store-title.active {
+      background: rgba(220, 38, 38, 0.2);
+      color: #fecaca;
+    }
+
+    .header-info {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .balance {
+      color: snow;
+      font-weight: bold;
+      font-size: 0.85rem;
+    }
+
+    .current-time {
+      font-size: 1rem;
+      color: snow;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+    }
+
+    /* ===== CONTENIDO PRINCIPAL ===== */
+    main {
+      max-width: 1200px;         /* Ancho máximo del contenido */
+      margin: 1rem auto;         /* Centrado horizontal */
+      padding: 0 1rem;
+      display: grid;
+      gap: 1rem;
+    }
+
+    /* ===== DISPOSICIÓN DE FILAS ===== */
+    .top-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;  /* Dos columnas iguales */
+      gap: 1rem;
+    }
+
+    .middle-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;  /* Dos columnas iguales */
+      gap: 1rem;
+      margin-top: 0;
+    }
+
+    /* ===== RESPONSIVE PARA DISPOSITIVOS MÓVILES ===== */
+    @media (max-width: 768px) {
+      .top-row,
+      .middle-row {
+        grid-template-columns: 1fr;    /* Una columna en móviles */
+      }
+      .header-info {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-end;
+      }
+    }
+
+    /* ===== TARJETAS (CARDS) ===== */
+    .card {
+      background: var(--card-bg);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+      color: var(--bg-dark);
+      font-weight: 600;
+    }
+
+    /* ===== CONTENEDORES PARA TOGGLES ===== */
+    .toggle-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .toggle-btn {
+      background: var(--accent-blue);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    /* ===== GRUPOS DE FORMULARIOS ===== */
+    .form-group {
+      margin-bottom: 0.75rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.25rem;
+      font-weight: 500;
+      color: #334155;
+      font-size: 0.85rem;
+    }
+
+    .form-group input,
+    .form-group button {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+      background: var(--input-bg);
+      font-size: 0.9rem;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+
+    /* ===== BOTONES DE PAGO ===== */
+    .payment-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;  /* Dos botones lado a lado */
+      gap: 0.5rem;
+      margin-top: 0.25rem;
+    }
+
+    .payment-btn {
+      padding: 0.5rem;
+      background: #f1f5f9;
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+
+    .payment-btn:hover {
+      background: #e2e8f0;
+    }
+
+    .payment-btn.active {
+      background: var(--accent-blue);
+      color: white;
+      border-color: var(--accent-blue);
+    }
+
+    /* ===== GRUPO DE BOTONES DE VENTA (ALINEADOS) ===== */
+    .btn-group {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      align-items: center;
+    }
+
+    .btn-add, .btn-generate, .btn-close-day {
+      padding: 0.5rem;
+      border: none;
+      border-radius: 5px;
+      font-weight: 600;
+      cursor: pointer;
+      flex: 1;                    /* Ambos botones igual de anchos */
+      text-align: center;
+      font-size: 0.85rem;
+      height: 38px;              /* Misma altura para alineación perfecta */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-add {
+      background: var(--accent-green);
+      color: white;
+    }
+
+    .btn-generate {
+      background: var(--accent-blue);
+      color: white;
+    }
+
+    .btn-close-day {
+      background: #f59e0b;
+      color: white;
+      margin-top: 0.5rem;
+    }
+
+    .btn-add:hover, .btn-generate:hover, .btn-close-day:hover {
+      opacity: 0.95;
+    }
+
+    /* ===== VISTA PREVIA DEL TICKET ===== */
+    #ticketPreview {
+      background: #f9fafb;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.75rem;
+      font-family: 'Courier New', monospace;  /* Fuente tipo ticket */
+      font-size: 0.85rem;
+      line-height: 1.3;
+      white-space: pre-wrap;      /* Mantiene saltos de línea */
+      word-break: break-word;
+      min-height: 160px;
+      max-height: 200px;
+      overflow-y: auto;
+      color: #1e293b;
+    }
+
+    /* ===== LISTAS (INVENTARIO E HISTORIAL) ===== */
+    #inventoryList, #historyList {
+      list-style: none;
+      max-height: 150px;
+      overflow-y: auto;           /* Scroll si hay muchos items */
+      padding-right: 0.5rem;
+      font-size: 0.85rem;
+    }
+
+    #inventoryList li, #historyList li {
+      padding: 0.4rem 0;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #inventoryList li:hover, #historyList li:hover {
+      background: #f8fafc;
+    }
+
+    #inventoryList li:last-child, #historyList li:last-child {
+      border-bottom: none;
+    }
+
+    /* ===== BOTÓN PARA VER RECIBOS EN HISTORIAL ===== */
+    .view-receipt-btn {
+      background: var(--accent-blue);
+      color: white;
+      border: none;
+      border-radius: 3px;
+      padding: 0.2rem 0.5rem;
+      font-size: 0.7rem;
+      cursor: pointer;
+    }
+
+    /* ===== CONTENIDO COLAPSABLE (para inventario e historial) ===== */
+    .collapsible-content {
+      transition: max-height 0.3s ease, opacity 0.3s ease;
+      overflow: hidden;
+      opacity: 1;
+    }
+
+    .collapsed {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+    }
+
+    /* ===== MODALES ===== */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);  /* Fondo oscuro semi-transparente */
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      animation: modalAppear 0.3s ease;
+    }
+
+    @keyframes modalAppear {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-header {
+      background: var(--bg-dark);
+      color: white;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-close:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    /* ===== CUERPO DEL MODAL (ESPECIAL PARA RECIBOS) ===== */
+    .modal-body.receipt-body {
+      padding: 1.5rem;
+      max-height: calc(90vh - 140px);
+      overflow-y: auto;
+      overflow-x: hidden;
+      font-family: 'Courier New', monospace;  /* Fuente monoespaciada */
+      font-size: 14px;                       /* Tamaño fijo para ticket */
+      line-height: 1.4;
+      white-space: pre-wrap;                  /* Mantiene formato del ticket */
+      word-break: break-word;
+      background: white;
+      color: #000000;                        /* Texto negro puro */
+      border: 1px solid #e5e7eb;
+      margin: 1rem;
+      border-radius: 4px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    /* Estilo específico para líneas de recibos */
+    .receipt-line {
+      padding: 2px 0;
+      font-family: 'Courier New', monospace;
+    }
+
+    .receipt-separator {
+      border-bottom: 1px dashed #666;  /* Líneas punteadas en lugar de sólidas */
+      margin: 4px 0;
+      height: 0;
+    }
+
+    /* Estilo específico para el modal de confirmación */
+    .confirmation-modal .modal-body {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      font-family: 'Segoe UI', sans-serif;  /* Fuente normal para confirmaciones */
+    }
+
+    .confirmation-text {
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+      color: #1e293b;
+    }
+
+    /* ===== ACCIONES DEL MODAL ===== */
+    .modal-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: #f1f5f9;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .modal-actions.confirmation-actions {
+      justify-content: space-around;
+    }
+
+    .share-btn, .confirm-btn, .cancel-btn, .danger-btn {
+      padding: 0.5rem 1.5rem;
+      border: none;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      min-width: 120px;
+    }
+
+    .share-btn {
+      background: var(--accent-green);
+      color: white;
+    }
+
+    .confirm-btn {
+      background: var(--accent-blue);
+      color: white;
+    }
+
+    .cancel-btn {
+      background: #94a3b8;
+      color: white;
+    }
+
+    .danger-btn {
+      background: var(--danger-red);
+      color: white;
+    }
+
+    .share-btn:hover, .confirm-btn:hover, .cancel-btn:hover, .danger-btn:hover {
+      opacity: 0.9;
+    }
+
+    /* ===== TOAST NOTIFICATIONS ===== */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--accent-green);
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: none;
+      align-items: center;
+      gap: 0.75rem;
+      z-index: 9999;
+      animation: slideIn 0.3s ease;
+      max-width: 300px;
+    }
+
+    .toast.error {
+      background: var(--danger-red);
+    }
+
+    .toast.info {
+      background: var(--accent-blue);
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    /* ===== CANVAS OCULTO PARA GENERAR IMAGEN ===== */
+    #ticketCanvas {
+      display: none;
+      position: absolute;
+      left: -9999px;
+    }
+
+    /* ===== ESTILOS ESPECIALES PARA REPORTE DE CIERRE ===== */
+    .close-day-report {
+      font-family: 'Courier New', monospace;
+      white-space: pre-wrap;
+      background: #f9fafb;
+      padding: 1rem;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .report-line {
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .report-total {
+      font-weight: bold;
+      color: var(--accent-green);
+      font-size: 1.1rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 2px solid var(--accent-blue);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <!-- Título del negocio con funcionalidad de triple clic -->
+    <div class="store-title" id="storeTitle">VARIEDADES Y SERVICIOS JA</div>
+    <div class="header-info">
+      <div class="balance" id="balanceLabel">Efectivo $0 | Transfer $0</div>
+      <div class="current-time" id="currentTime">00:00:00 AM</div>
+    </div>
+  </header>
+
+  <main>
+    <!-- FILA SUPERIOR: VENTA + TICKET -->
+    <div class="top-row">
+      <!-- TARJETA DE VENTA -->
+      <div class="card">
+        <h2>VENTA</h2>
+        <div class="form-group">
+          <label>Producto</label>
+          <input type="text" id="productInput" placeholder="Nombre del producto" />
+        </div>
+        <div class="form-group">
+          <label>Cantidad</label>
+          <input type="number" id="quantityInput" placeholder="Cantidad" step="any" />
+        </div>
+        <div class="form-group">
+          <label>Precio</label>
+          <input type="number" id="priceInput" placeholder="Precio unitario" step="any" />
+        </div>
+        <div class="form-group">
+          <label>Método de Pago</label>
+          <div class="payment-buttons">
+            <button class="payment-btn active" data-method="Efectivo">Efectivo</button>
+            <button class="payment-btn" data-method="Transferencia">Transferencia</button>
+          </div>
+        </div>
+        <!-- BOTONES ALINEADOS UNO AL LADO DEL OTRO -->
+        <div class="btn-group">
+          <button class="btn-add" id="addToSaleBtn">Agregar a Venta</button>
+          <button class="btn-generate" id="generateBtn">Generar Recibo</button>
+        </div>
+        <!-- BOTÓN PARA CERRAR EL DÍA -->
+        <button class="btn-close-day" id="closeDayBtn">Cerrar Día</button>
+      </div>
+
+      <!-- TARJETA DE TICKET (VISTA PREVIA) -->
+      <div class="card">
+        <h2>TICKET</h2>
+        <div id="ticketPreview">VARIEDADES Y SERVICIOS JA\n................................\n</div>
+      </div>
+    </div>
+
+    <!-- FILA MEDIA: INVENTARIO + HISTORIAL (CON TOGGLES) -->
+    <div class="middle-row">
+      <!-- TARJETA DE INVENTARIO -->
+      <div class="card">
+        <div class="toggle-container">
+          <h2>INVENTARIO</h2>
+          <button class="toggle-btn" id="toggleInventoryBtn">Ocultar</button>
+        </div>
+        <div class="collapsible-content" id="inventoryContent">
+          <ul id="inventoryList"></ul>
+          <div style="margin-top: 0.75rem;">
+            <div class="form-group">
+              <label>Nuevo producto</label>
+              <input type="text" id="newProduct" placeholder="Nombre" />
+            </div>
+            <div class="form-group">
+              <label>Precio</label>
+              <input type="number" id="newPrice" placeholder="Precio" step="any" />
+            </div>
+            <button class="btn-add" id="addInventoryBtn">Agregar al Inventario</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TARJETA DE HISTORIAL -->
+      <div class="card">
+        <div class="toggle-container">
+          <h2>HISTORIAL</h2>
+          <button class="toggle-btn" id="toggleHistoryBtn">Ocultar</button>
+        </div>
+        <div class="collapsible-content" id="historyContent">
+          <ul id="historyList"></ul>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL PARA VISUALIZAR RECIBOS -->
+  <div class="modal" id="receiptModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>RECIBO DE VENTA</h3>
+        <button class="modal-close" id="modalClose">&times;</button>
+      </div>
+      <div class="modal-body receipt-body" id="modalReceiptContent"></div>
+      <div class="modal-actions">
+        <button class="share-btn" id="shareImageBtn">
+          📤 Compartir Imagen
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE CONFIRMACIÓN (reutilizable) -->
+  <div class="modal confirmation-modal" id="confirmationModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="confirmationTitle">Confirmar Acción</h3>
+        <button class="modal-close" id="confirmationModalClose">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="confirmation-text" id="confirmationText"></div>
+      </div>
+      <div class="modal-actions confirmation-actions">
+        <button class="cancel-btn" id="confirmationCancel">Cancelar</button>
+        <button class="confirm-btn" id="confirmationConfirm">Aceptar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PARA BORRAR HISTORIAL -->
+  <div class="modal" id="clearDataModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>⚠️ ADVERTENCIA</h3>
+        <button class="modal-close" id="clearDataModalClose">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: 1rem; color: var(--danger-red); font-weight: bold;">
+          ESTA ACCIÓN NO SE PUEDE DESHACER
+        </p>
+        <p>¿Estás seguro de que quieres borrar TODOS los datos?</p>
+        <ul style="margin: 1rem 0 1rem 1.5rem;">
+          <li>✅ Se borrará todo el historial de ventas</li>
+          <li>✅ Se resetearán los balances a $0</li>
+          <li>✅ Se mantendrá el inventario de productos</li>
+          <li>❌ Esta acción NO se puede deshacer</li>
+        </ul>
+        <p><strong>Nota:</strong> Esta función es para desarrollo/pruebas.</p>
+      </div>
+      <div class="modal-actions confirmation-actions">
+        <button class="cancel-btn" id="clearDataCancel">Cancelar</button>
+        <button class="danger-btn" id="clearDataConfirm">BORRAR TODO</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PARA CIERRE DE DÍA -->
+  <div class="modal" id="closeDayModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>📋 CIERRE DE DÍA</h3>
+        <button class="modal-close" id="closeDayModalClose">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="closeDayReport" class="close-day-report">
+          <!-- Reporte generado dinámicamente -->
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="share-btn" id="copyReportBtn">
+          📋 Copiar Reporte
+        </button>
+        <button class="confirm-btn" id="confirmCloseDayBtn">
+          ✅ Confirmar Cierre
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div class="toast" id="toast"></div>
+
+  <!-- CANVAS OCULTO PARA GENERAR IMAGEN -->
+  <canvas id="ticketCanvas"></canvas>
+
+  <script>
+    // ================= CONFIGURACIÓN =================
+    const CARACAS_OFFSET_HOURS = -4; // UTC-4 para Caracas, Venezuela
+    const SEPARATOR = '................................'; // Separador para recibos
+
+    // ================= FUNCIONES DE TIEMPO =================
+    function getCaracasTime() {
+      const now = new Date();
+      // Obtener hora UTC
+      const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+      // Aplicar offset de Caracas (UTC-4)
+      return new Date(utcTime + (CARACAS_OFFSET_HOURS * 3600000));
+    }
+
+    function formatCurrency(value) {
+      if (typeof value !== 'number' || isNaN(value)) return '$0';
+      const rounded = Math.round(value * 100) / 100;
+      return '$' + rounded.toLocaleString('es-CO', {
+        minimumFractionDigits: rounded % 1 === 0 ? 0 : 2,
+        maximumFractionDigits: 2
+      }).replace(/,/g, '.');
+    }
+
+    function formatDate(date) {
+      const days = ["DOM", "LUN", "MAR", "MIE", "JUE", "VIE", "SAB"];
+      const dayName = days[date.getDay()];
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      const hours = date.getHours();
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      
+      let displayHours = hours % 12 || 12;
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      
+      return `${day}/${month}/${year} ${displayHours}:${minutes} ${ampm}`;
+    }
+
+    function formatTime12h(date) {
+      // Formato 12h con AM/PM para el reloj
+      const hours = date.getHours();
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const seconds = String(date.getSeconds()).padStart(2, '0');
+      
+      let displayHours = hours % 12 || 12;
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      
+      return `${displayHours}:${minutes}:${seconds} ${ampm}`;
+    }
+
+    function getMonthKey(date) {
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    }
+
+    // ================= FUNCIONES DE UTILIDAD =================
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = 'toast';
+      toast.classList.add(type);
+      toast.style.display = 'flex';
+      
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 3000);
+    }
+
+    function showConfirmation(title, message, onConfirm) {
+      const modal = document.getElementById('confirmationModal');
+      const titleElement = document.getElementById('confirmationTitle');
+      const textElement = document.getElementById('confirmationText');
+      const confirmBtn = document.getElementById('confirmationConfirm');
+      const cancelBtn = document.getElementById('confirmationCancel');
+      const closeBtn = document.getElementById('confirmationModalClose');
+      
+      titleElement.textContent = title;
+      textElement.textContent = message;
+      
+      modal.style.display = 'flex';
+      
+      const closeModal = () => {
+        modal.style.display = 'none';
+        confirmBtn.onclick = null;
+        cancelBtn.onclick = null;
+        closeBtn.onclick = null;
+      };
+      
+      confirmBtn.onclick = () => {
+        onConfirm();
+        closeModal();
+      };
+      
+      cancelBtn.onclick = closeModal;
+      closeBtn.onclick = closeModal;
+    }
+
+    // ================= DATOS =================
+    let DATA = {
+      inventario: {},
+      historial: [],
+      balance: { efectivo: 0, transferencia: 0 },
+      secuencia: {},
+      cierres: [] // Para guardar históricos de cierres
+    };
+    let VENTA_ACTUAL = [];
+    let selectedMethod = 'Efectivo';
+    let currentReceiptText = '';
+    
+    // ================= ELEMENTOS DE UI =================
+    const storeTitle = document.getElementById('storeTitle');
+    const productInput = document.getElementById('productInput');
+    const quantityInput = document.getElementById('quantityInput');
+    const priceInput = document.getElementById('priceInput');
+    const paymentButtons = document.querySelectorAll('.payment-btn');
+    const addToSaleBtn = document.getElementById('addToSaleBtn');
+    const generateBtn = document.getElementById('generateBtn');
+    const inventoryList = document.getElementById('inventoryList');
+    const historyList = document.getElementById('historyList');
+    const ticketPreview = document.getElementById('ticketPreview');
+    const balanceLabel = document.getElementById('balanceLabel');
+    const newProduct = document.getElementById('newProduct');
+    const newPrice = document.getElementById('newPrice');
+    const addInventoryBtn = document.getElementById('addInventoryBtn');
+    const toggleInventoryBtn = document.getElementById('toggleInventoryBtn');
+    const toggleHistoryBtn = document.getElementById('toggleHistoryBtn');
+    const inventoryContent = document.getElementById('inventoryContent');
+    const historyContent = document.getElementById('historyContent');
+    const receiptModal = document.getElementById('receiptModal');
+    const modalClose = document.getElementById('modalClose');
+    const modalReceiptContent = document.getElementById('modalReceiptContent');
+    const shareImageBtn = document.getElementById('shareImageBtn');
+    const currentTimeElement = document.getElementById('currentTime');
+    const ticketCanvas = document.getElementById('ticketCanvas');
+    const closeDayBtn = document.getElementById('closeDayBtn');
+    const clearDataModal = document.getElementById('clearDataModal');
+    const clearDataConfirm = document.getElementById('clearDataConfirm');
+    const clearDataCancel = document.getElementById('clearDataCancel');
+    const clearDataModalClose = document.getElementById('clearDataModalClose');
+    const closeDayModal = document.getElementById('closeDayModal');
+    const closeDayModalClose = document.getElementById('closeDayModalClose');
+    const closeDayReport = document.getElementById('closeDayReport');
+    const copyReportBtn = document.getElementById('copyReportBtn');
+    const confirmCloseDayBtn = document.getElementById('confirmCloseDayBtn');
+
+    // ================= TRIPLE CLIC EN TÍTULO =================
+    let clickCount = 0;
+    let clickTimer = null;
+    
+    storeTitle.addEventListener('click', () => {
+      clickCount++;
+      
+      // Agregar efecto visual
+      storeTitle.classList.add('active');
+      setTimeout(() => storeTitle.classList.remove('active'), 300);
+      
+      if (clickCount === 1) {
+        clickTimer = setTimeout(() => {
+          clickCount = 0;
+        }, 1000);
+      } else if (clickCount === 3) {
+        clearTimeout(clickTimer);
+        clickCount = 0;
+        clearDataModal.style.display = 'flex';
+      }
+    });
+
+    // ================= ACTUALIZAR HORA EN TIEMPO REAL =================
+    function updateCurrentTime() {
+      const caracasTime = getCaracasTime();
+      currentTimeElement.textContent = formatTime12h(caracasTime);
+    }
+
+    // Actualizar cada segundo
+    setInterval(updateCurrentTime, 1000);
+    updateCurrentTime(); // Inicializar
+
+    // ================= TOGGLE FUNCIONALIDAD =================
+    toggleInventoryBtn.addEventListener('click', () => {
+      const isCollapsed = inventoryContent.classList.toggle('collapsed');
+      toggleInventoryBtn.textContent = isCollapsed ? 'Mostrar' : 'Ocultar';
+    });
+
+    toggleHistoryBtn.addEventListener('click', () => {
+      const isCollapsed = historyContent.classList.toggle('collapsed');
+      toggleHistoryBtn.textContent = isCollapsed ? 'Mostrar' : 'Ocultar';
+    });
+
+    // ================= MODAL FUNCIONALIDAD =================
+    function showReceiptModal(receiptText) {
+      currentReceiptText = receiptText;
+      // Asegurar que el modal use la fuente monoespaciada
+      modalReceiptContent.textContent = receiptText;
+      modalReceiptContent.className = 'modal-body receipt-body';
+      receiptModal.style.display = 'flex';
+    }
+
+    modalClose.addEventListener('click', () => {
+      receiptModal.style.display = 'none';
+    });
+
+    receiptModal.addEventListener('click', (e) => {
+      if (e.target === receiptModal) {
+        receiptModal.style.display = 'none';
+      }
+    });
+
+    // ================= BORRAR DATOS =================
+    clearDataConfirm.addEventListener('click', () => {
+      // Guardar inventario para no perderlo
+      const inventarioBackup = { ...DATA.inventario };
+      
+      DATA = {
+        inventario: inventarioBackup,
+        historial: [],
+        balance: { efectivo: 0, transferencia: 0 },
+        secuencia: {},
+        cierres: DATA.cierres // Mantener historial de cierres
+      };
+      
+      localStorage.setItem('ja_data', JSON.stringify(DATA));
+      renderInventory();
+      renderHistory();
+      updateBalance();
+      previewTicket();
+      clearDataModal.style.display = 'none';
+      showToast('✅ Datos borrados exitosamente', 'success');
+    });
+
+    clearDataCancel.addEventListener('click', () => {
+      clearDataModal.style.display = 'none';
+    });
+
+    clearDataModalClose.addEventListener('click', () => {
+      clearDataModal.style.display = 'none';
+    });
+
+    // ================= GENERAR IMAGEN DEL TICKET (ESTILO ABASCO MEJORADO) =================
+    function generateTicketImage() {
+      const canvas = ticketCanvas;
+      const ctx = canvas.getContext('2d');
+      
+      // Usar fuente monoespaciada para todo
+      const fontFamily = '"Courier New", monospace';
+      
+      // Calcular dimensiones basadas en el contenido
+      const lines = currentReceiptText.split('\n');
+      const lineHeight = 22;
+      const padding = 25;
+      
+      // Configurar contexto temporal para medir
+      ctx.font = `14px ${fontFamily}`;
+      
+      // Calcular el ancho máximo
+      let maxWidth = 0;
+      lines.forEach(line => {
+        const width = ctx.measureText(line).width;
+        if (width > maxWidth) maxWidth = width;
+      });
+      
+      // Dimensiones base
+      const baseWidth = Math.max(350, maxWidth + padding * 2);
+      const baseHeight = padding * 2 + (lines.length * lineHeight);
+      
+      // Configurar canvas con alta resolución
+      const scale = 4;
+      canvas.width = baseWidth * scale;
+      canvas.height = baseHeight * scale;
+      
+      // Escalar contexto
+      ctx.scale(scale, scale);
+      
+      // Fondo blanco
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, baseWidth, baseHeight);
+      
+      // Configurar texto (todo en negro)
+      ctx.fillStyle = '#000000';
+      ctx.textBaseline = 'top';
+      
+      // Dibujar cada línea con formato de recibo
+      lines.forEach((line, index) => {
+        let fontSize = 14;
+        let fontWeight = 'normal';
+        let textAlign = 'left';
+        let xPos = padding;
+        
+        // Determinar estilo basado en el contenido
+        if (index === 0) {
+          // Título principal - más grande y centrado
+          fontSize = 18;
+          fontWeight = 'bold';
+          textAlign = 'center';
+          xPos = baseWidth / 2;
+        } 
+        else if (line.includes(SEPARATOR)) {
+          // Línea separadora - dibujar puntos
+          fontSize = 14;
+          fontWeight = 'normal';
+          textAlign = 'center';
+          xPos = baseWidth / 2;
+        }
+        else if (line.includes('Pago') || line.includes('TOTAL')) {
+          // Información de pago y total - negrita
+          fontSize = 15;
+          fontWeight = 'bold';
+        }
+        else if (line.includes('JA-')) {
+          // Referencia del recibo - centrada
+          fontSize = 14;
+          fontWeight = 'bold';
+          textAlign = 'center';
+          xPos = baseWidth / 2;
+        }
+        else if (line.includes('/')) {
+          // Fecha - centrada
+          fontSize = 14;
+          textAlign = 'center';
+          xPos = baseWidth / 2;
+        }
+        else if (line.includes('x')) {
+          // Productos - alineado a la izquierda
+          fontSize = 14;
+        }
+        
+        // Aplicar configuración de fuente
+        ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+        ctx.textAlign = textAlign;
+        
+        // Calcular posición Y
+        const yPos = padding + (index * lineHeight);
+        
+        // Dibujar texto
+        ctx.fillText(line, xPos, yPos);
+      });
+      
+      // Dibujar borde del ticket
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(5, 5, baseWidth - 10, baseHeight - 10);
+      
+      // Convertir a imagen y compartir
+      canvas.toBlob(blob => {
+        if (blob) {
+          const now = getCaracasTime();
+          const fileName = `Recibo-${now.getDate()}${now.getMonth()+1}${now.getFullYear()}-${now.getHours()}${now.getMinutes()}.png`;
+          const file = new File([blob], fileName, { type: 'image/png' });
+          
+          if (navigator.share && navigator.canShare({ files: [file] })) {
+            navigator.share({
+              files: [file],
+              title: 'Recibo de Venta',
+              text: 'Recibo generado en Variedades y Servicios JA'
+            }).catch(error => {
+              console.log('Error sharing:', error);
+              downloadImage(canvas, fileName);
+            });
+          } else {
+            // Fallback: descargar imagen
+            downloadImage(canvas, fileName);
+          }
+        }
+      }, 'image/png', 1.0); // Máxima calidad
+    }
+
+    function downloadImage(canvas, fileName) {
+      const link = document.createElement('a');
+      link.download = fileName;
+      link.href = canvas.toDataURL('image/png');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('📁 Imagen descargada', 'success');
+    }
+
+    shareImageBtn.addEventListener('click', generateTicketImage);
+
+    // ================= CIERRE DE DÍA =================
+    closeDayBtn.addEventListener('click', () => {
+      const today = new Date();
+      const todayStr = `${today.getDate()}/${today.getMonth()+1}/${today.getFullYear()}`;
+      
+      // Generar reporte
+      let report = `📋 CIERRE DE DÍA\n`;
+      report += `Fecha: ${todayStr}\n`;
+      report += `Hora: ${formatTime12h(getCaracasTime())}\n`;
+      report += `================================\n`;
+      report += `VENTAS DEL DÍA:\n`;
+      report += `================================\n`;
+      
+      // Filtrar ventas de hoy
+      const todayVentas = DATA.historial.filter(item => {
+        const itemDate = new Date(item.texto.match(/\d{2}\/\d{2}\/\d{4}/)[0].split('/').reverse().join('-'));
+        return itemDate.toDateString() === today.toDateString();
+      });
+      
+      if (todayVentas.length === 0) {
+        report += `No hay ventas registradas hoy\n`;
+      } else {
+        let totalEfectivo = 0;
+        let totalTransferencia = 0;
+        
+        todayVentas.forEach((venta, index) => {
+          const methodMatch = venta.texto.match(/Pago\s+(Efectivo|Transferencia)/);
+          const method = methodMatch ? methodMatch[1] : 'Efectivo';
+          
+          if (method === 'Efectivo') {
+            totalEfectivo += venta.total;
+          } else {
+            totalTransferencia += venta.total;
+          }
+          
+          report += `${index + 1}. ${venta.ref} - ${formatCurrency(venta.total)} (${method})\n`;
+        });
+        
+        report += `================================\n`;
+        report += `RESUMEN:\n`;
+        report += `--------------------------------\n`;
+        report += `Efectivo: ${formatCurrency(totalEfectivo)}\n`;
+        report += `Transferencia: ${formatCurrency(totalTransferencia)}\n`;
+        report += `--------------------------------\n`;
+        report += `TOTAL DEL DÍA: ${formatCurrency(totalEfectivo + totalTransferencia)}\n`;
+      }
+      
+      report += `================================\n`;
+      report += `BALANCE ACTUAL:\n`;
+      report += `Efectivo: ${formatCurrency(DATA.balance.efectivo)}\n`;
+      report += `Transferencia: ${formatCurrency(DATA.balance.transferencia)}\n`;
+      report += `================================\n`;
+      report += `FIN DEL REPORTE`;
+      
+      closeDayReport.textContent = report;
+      closeDayModal.style.display = 'flex';
+    });
+
+    closeDayModalClose.addEventListener('click', () => {
+      closeDayModal.style.display = 'none';
+    });
+
+    copyReportBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(closeDayReport.textContent)
+        .then(() => showToast('📋 Reporte copiado al portapapeles', 'success'))
+        .catch(() => showToast('❌ Error al copiar', 'error'));
+    });
+
+    confirmCloseDayBtn.addEventListener('click', () => {
+      const today = new Date();
+      const todayStr = `${today.getDate()}/${today.getMonth()+1}/${today.getFullYear()}`;
+      
+      // Guardar cierre en historial
+      DATA.cierres.push({
+        fecha: todayStr,
+        hora: formatTime12h(getCaracasTime()),
+        balanceEfectivo: DATA.balance.efectivo,
+        balanceTransferencia: DATA.balance.transferencia,
+        reporte: closeDayReport.textContent
+      });
+      
+      // Mantener solo los últimos 30 cierres
+      if (DATA.cierres.length > 30) {
+        DATA.cierres = DATA.cierres.slice(-30);
+      }
+      
+      localStorage.setItem('ja_data', JSON.stringify(DATA));
+      closeDayModal.style.display = 'none';
+      showToast('✅ Cierre de día guardado exitosamente', 'success');
+    });
+
+    // ================= MANEJO DE MÉTODO DE PAGO =================
+    paymentButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        paymentButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedMethod = btn.dataset.method;
+        previewTicket();
+      });
+    });
+
+    // ================= RENDERIZADO =================
+    function updateBalance() {
+      balanceLabel.textContent = `Efectivo ${formatCurrency(DATA.balance.efectivo)} | Transfer ${formatCurrency(DATA.balance.transferencia)}`;
+    }
+
+    function renderInventory() {
+      inventoryList.innerHTML = '';
+      for (const [name, price] of Object.entries(DATA.inventario)) {
+        const li = document.createElement('li');
+        li.textContent = `${name} - ${formatCurrency(price)}`;
+        li.addEventListener('click', () => {
+          productInput.value = name;
+          priceInput.value = price;
+          quantityInput.focus();
+        });
+        inventoryList.appendChild(li);
+      }
+    }
+
+    function renderHistory() {
+      historyList.innerHTML = '';
+      [...DATA.historial].reverse().forEach(item => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <span>${item.ref} - ${formatCurrency(item.total)}</span>
+          <button class="view-receipt-btn" data-ref="${item.ref}">Ver</button>
+        `;
+        
+        const viewBtn = li.querySelector('.view-receipt-btn');
+        viewBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          showReceiptModal(item.texto);
+        });
+        
+        historyList.appendChild(li);
+      });
+    }
+
+    function previewTicket() {
+      const now = formatDate(getCaracasTime());
+      let text = `VARIEDADES Y SERVICIOS JA\n${SEPARATOR}\n${now}\n${SEPARATOR}\n`;
+      let total = 0;
+
+      VENTA_ACTUAL.forEach(item => {
+        const lineTotal = item.cantidad * item.precio;
+        total += lineTotal;
+        text += `${item.producto} x${item.cantidad} ${formatCurrency(lineTotal)}\n`;
+      });
+
+      text += `${SEPARATOR}\nPago ${selectedMethod}\nTOTAL ${formatCurrency(total)}`;
+      ticketPreview.textContent = text;
+    }
+
+    // ================= LÓGICA =================
+    function agregarAVenta() {
+      const prod = productInput.value.trim();
+      const cantStr = quantityInput.value.trim();
+      const precioStr = priceInput.value.trim();
+
+      if (!prod) {
+        showToast('❌ El producto no puede estar vacío', 'error');
+        return;
+      }
+      const cant = parseFloat(cantStr);
+      const precio = parseFloat(precioStr);
+
+      if (isNaN(cant) || cant <= 0) {
+        showToast('❌ La cantidad debe ser mayor a 0', 'error');
+        return;
+      }
+      if (isNaN(precio) || precio <= 0) {
+        showToast('❌ El precio debe ser mayor a 0', 'error');
+        return;
+      }
+
+      // Mostrar confirmación
+      showConfirmation(
+        'Agregar Producto',
+        `¿Agregar "${prod}" x${cant} a ${formatCurrency(cant * precio)} a la venta?`,
+        () => {
+          VENTA_ACTUAL.push({ producto: prod, cantidad: cant, precio: precio });
+          productInput.value = '';
+          quantityInput.value = '';
+          priceInput.value = '';
+          productInput.focus();
+          previewTicket();
+          showToast(`✅ "${prod}" agregado a la venta`, 'success');
+        }
+      );
+    }
+
+    function generarRecibo() {
+      if (VENTA_ACTUAL.length === 0) {
+        showToast('❌ No hay productos en la venta', 'error');
+        return;
+      }
+
+      const total = VENTA_ACTUAL.reduce((sum, item) => sum + (item.cantidad * item.precio), 0);
+      
+      showConfirmation(
+        'Generar Recibo',
+        `¿Generar recibo con ${VENTA_ACTUAL.length} producto(s) por un total de ${formatCurrency(total)}?`,
+        () => {
+          const now = getCaracasTime();
+          const refKey = getMonthKey(now);
+          if (!DATA.secuencia[refKey]) DATA.secuencia[refKey] = 1;
+          const num = DATA.secuencia[refKey]++;
+          const days = ["DOM","LUN","MAR","MIE","JUE","VIE","SAB"];
+          const dia = days[now.getDay()];
+          const ref = `JA-${dia}-${String(num).padStart(3, '0')}`;
+
+          const nowStr = formatDate(now);
+          let texto = `VARIEDADES Y SERVICIOS JA\n${SEPARATOR}\n${ref}\n${nowStr}\n${SEPARATOR}\n`;
+          VENTA_ACTUAL.forEach(item => {
+            const lineTotal = item.cantidad * item.precio;
+            texto += `${item.producto} x${item.cantidad} ${formatCurrency(lineTotal)}\n`;
+          });
+          texto += `${SEPARATOR}\nPago ${selectedMethod}\nTOTAL ${formatCurrency(total)}\n`;
+
+          DATA.historial.push({ ref, total, texto });
+
+          if (selectedMethod === 'Efectivo') {
+            DATA.balance.efectivo += total;
+          } else {
+            DATA.balance.transferencia += total;
+          }
+
+          VENTA_ACTUAL = [];
+          previewTicket();
+          localStorage.setItem('ja_data', JSON.stringify(DATA));
+          renderHistory();
+          updateBalance();
+          showToast(`✅ Recibo ${ref} generado exitosamente`, 'success');
+        }
+      );
+    }
+
+    function addInventory() {
+      const name = newProduct.value.trim();
+      const priceStr = newPrice.value.trim();
+      if (!name) {
+        showToast('❌ Nombre del producto requerido', 'error');
+        return;
+      }
+      const price = parseFloat(priceStr);
+      if (isNaN(price) || price <= 0) {
+        showToast('❌ Precio debe ser mayor a 0', 'error');
+        return;
+      }
+
+      showConfirmation(
+        'Agregar al Inventario',
+        `¿Agregar "${name}" con precio ${formatCurrency(price)} al inventario?`,
+        () => {
+          DATA.inventario[name] = price;
+          localStorage.setItem('ja_data', JSON.stringify(DATA));
+          renderInventory();
+          newProduct.value = '';
+          newPrice.value = '';
+          newProduct.focus();
+          showToast(`✅ "${name}" agregado al inventario`, 'success');
+        }
+      );
+    }
+
+    // ================= EVENTOS =================
+    addToSaleBtn.addEventListener('click', agregarAVenta);
+    generateBtn.addEventListener('click', generarRecibo);
+    addInventoryBtn.addEventListener('click', addInventory);
+
+    // Eventos de teclado
+    productInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') quantityInput.focus();
+    });
+    
+    quantityInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') priceInput.focus();
+    });
+    
+    priceInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') agregarAVenta();
+    });
+    
+    newProduct.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') newPrice.focus();
+    });
+    
+    newPrice.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') addInventory();
+    });
+
+    // ================= PERSISTENCIA Y SEGURIDAD =================
+    // Guardar datos automáticamente antes de cerrar la página
+    window.addEventListener('beforeunload', () => {
+      localStorage.setItem('ja_data', JSON.stringify(DATA));
+    });
+
+    // Guardar automáticamente cada 30 segundos
+    setInterval(() => {
+      localStorage.setItem('ja_data', JSON.stringify(DATA));
+    }, 30000);
+
+    // ================= INICIALIZACIÓN =================
+    // Cargar datos guardados
+    const saved = localStorage.getItem('ja_data');
+    if (saved) {
+      try {
+        const parsedData = JSON.parse(saved);
+        Object.assign(DATA, parsedData);
+        
+        // Backward compatibility: asegurar que exista el array de cierres
+        if (!DATA.cierres) {
+          DATA.cierres = [];
+        }
+        
+        showToast('📂 Datos cargados exitosamente', 'success');
+      } catch (e) {
+        console.error('Error al cargar datos:', e);
+        showToast('⚠️ Error al cargar datos, usando datos nuevos', 'error');
+      }
+    } else {
+      showToast('✅ Aplicación lista para usar', 'success');
+    }
+    
+    renderInventory();
+    renderHistory();
+    updateBalance();
+    previewTicket();
+    
+    // Mostrar mensaje sobre persistencia
+    setTimeout(() => {
+      showToast('💾 Los datos se guardan automáticamente', 'info');
+    }, 2000);
+    
+    // ========== REGISTRO DE SERVICE WORKER (PWA) ==========
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('✅ SW registrado, scope:', reg.scope))
+          .catch(err => console.error('❌ Error al registrar SW:', err));
+      });
+    }
+  </script>
+</body>
+</html>

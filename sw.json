@@ -1,0 +1,42 @@
+const CACHE_NAME = 'ja-cache-v1';
+const REPO_PATH = '/variedades-serviciosJA';
+
+const urlsToCache = [
+  `${REPO_PATH}/`,
+  `${REPO_PATH}/index.html`,
+  `${REPO_PATH}/manifest.json`,
+  `${REPO_PATH}/icon-192.png`,
+  `${REPO_PATH}/icon-512.png`
+];
+
+self.addEventListener('install', event => {
+  self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(urlsToCache))
+  );
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cache => {
+          if (cache !== CACHE_NAME) {
+            return caches.delete(cache);
+          }
+        })
+      );
+    })
+  );
+});
+
+self.addEventListener('fetch', event => {
+  // Solo intercepta peticiones dentro del repositorio
+  if (event.request.url.includes(REPO_PATH)) {
+    event.respondWith(
+      caches.match(event.request)
+        .then(response => response || fetch(event.request))
+    );
+  }
+});

@@ -1,0 +1,25 @@
+{
+  "name": "Variedades y Servicios JA",
+  "short_name": "JA",
+  "description": "Sistema de ventas e inventario",
+  "start_url": "/variedades-serviciosJA/",
+  "scope": "/variedades-serviciosJA/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#240028",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/variedades-serviciosJA/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/variedades-serviciosJA/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
